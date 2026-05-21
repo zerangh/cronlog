@@ -39,16 +39,23 @@ func Run(ctx context.Context, cfg Config, fn JobFunc) error {
 		})
 	}
 
+	// Notify on failure always; notify on success only when NotifyOnSuccess is
+	// set and the job produced no logged errors during its run.
 	shouldNotify := runErr != nil || (cfg.NotifyOnSuccess && !log.HasErrors())
 	if cfg.WebhookURL != "" && shouldNotify {
-		n := webhook.NewNotifier(cfg.WebhookURL)
-		payload := buildPayload(cfg.JobName, log, runErr)
-		if notifyErr := n.Notify(payload); notifyErr != nil {
+		if notifyErr := notify(cfg.WebhookURL, cfg.JobName, log, runErr); notifyErr != nil {
 			log.Warn("webhook notification failed", map[string]string{"error": notifyErr.Error()})
 		}
 	}
 
 	return runErr
+}
+
+// notify sends a webhook notification for the completed job.
+func notify(webhookURL, jobName string, log *logger.Logger, jobErr error) error {
+	n := webhook.NewNotifier(webhookURL)
+	payload := buildPayload(jobName, log, jobErr)
+	return n.Notify(payload)
 }
 
 // buildPayload constructs the notification message from the job summary.

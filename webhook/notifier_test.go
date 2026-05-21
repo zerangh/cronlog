@@ -68,3 +68,11 @@ func TestNotify_EmptyURL(t *testing.T) {
 		t.Fatal("expected error for empty URL, got nil")
 	}
 }
+
+func TestNotify_InvalidURL(t *testing.T) {
+	n := webhook.NewNotifier("://invalid-url")
+	err := n.Notify(webhook.Payload{JobName: "test"})
+	if err == nil {
+		t.Fatal("expected error for invalid URL, got nil")
+	}
+}

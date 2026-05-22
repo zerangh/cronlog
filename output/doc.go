@@ -21,5 +21,11 @@
 //	})
 //
 // The desired format can be parsed from an environment variable or CLI flag
-// using [ParseFormat].
+// using [ParseFormat]. For example, to read from an environment variable:
+//
+//	fmt, err := output.ParseFormat(os.Getenv("CRONLOG_FORMAT"))
+//	if err != nil {
+//	    fmt = output.FormatText // fall back to text if unset or invalid
+//	}
+//	w := output.NewWriter(os.Stdout, fmt)
 package output

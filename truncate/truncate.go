@@ -52,3 +52,9 @@ func (t *Truncator) Fields(fields map[string]any) map[string]any {
 	}
 	return out
 }
+
+// Truncated reports whether s would be truncated by the Truncator, i.e.
+// whether its length exceeds the configured maximum.
+func (t *Truncator) Truncated(s string) bool {
+	return len(s) > t.maxLen
+}

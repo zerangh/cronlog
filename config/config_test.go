@@ -35,6 +35,13 @@ func TestTimeout_ReturnsDuration(t *testing.T) {
 	}
 }
 
+func TestTimeout_ZeroSeconds(t *testing.T) {
+	cfg := &config.Config{JobName: "j", TimeoutSeconds: 0}
+	if got := cfg.Timeout(); got != 0 {
+		t.Fatalf("expected 0 duration for zero timeout, got %v", got)
+	}
+}
+
 func TestFromEnv_MissingJobName(t *testing.T) {
 	t.Setenv("CRONLOG_JOB_NAME", "")
 	_, err := config.FromEnv()
@@ -85,5 +92,19 @@ func TestFromEnv_NotifyOnSuccess(t *testing.T) {
 	}
 	if !cfg.NotifyOnSuccess {
 		t.Error("expected NotifyOnSuccess to be true")
+	}
+}
+
+func TestFromEnv_WebhookURL(t *testing.T) {
+	const wantURL = "https://hooks.example.com/xyz"
+	t.Setenv("CRONLOG_JOB_NAME", "daily-report")
+	t.Setenv("CRONLOG_WEBHOOK_URL", wantURL)
+
+	cfg, err := config.FromEnv()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.WebhookURL != wantURL {
+		t.Errorf("expected webhook URL %q, got %q", wantURL, cfg.WebhookURL)
 	}
 }

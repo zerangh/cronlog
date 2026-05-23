@@ -82,3 +82,23 @@ func TestFields_StartedAtIsRFC3339(t *testing.T) {
 		t.Errorf("started_at: got %q, want %q", fields["started_at"], want)
 	}
 }
+
+func TestWithJob_OverwritesPreviousMeta(t *testing.T) {
+	ctx := jobctx.WithJob(context.Background(), baseMeta())
+
+	updated := baseMeta()
+	updated.JobName = "cleanup"
+	updated.RunID = "xyz-999"
+	ctx = jobctx.WithJob(ctx, updated)
+
+	meta, ok := jobctx.JobFrom(ctx)
+	if !ok {
+		t.Fatal("expected meta to be present after overwrite")
+	}
+	if meta.JobName != "cleanup" {
+		t.Errorf("job name after overwrite: got %q, want %q", meta.JobName, "cleanup")
+	}
+	if meta.RunID != "xyz-999" {
+		t.Errorf("run id after overwrite: got %q, want %q", meta.RunID, "xyz-999")
+	}
+}

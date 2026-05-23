@@ -77,6 +77,23 @@ func TestRun_ContextCancelledDuringDelay(t *testing.T) {
 	}
 }
 
+func TestRun_ContextAlreadyCancelled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	calls := 0
+	err := retry.Run(ctx, retry.Policy{MaxAttempts: 3, Delay: 0}, func(_ context.Context) error {
+		calls++
+		return errBoom
+	})
+	if err == nil {
+		t.Fatal("expected error when context is already cancelled")
+	}
+	if calls > 1 {
+		t.Fatalf("expected at most 1 call with pre-cancelled context, got %d", calls)
+	}
+}
+
 func TestValidate_InvalidMaxAttempts(t *testing.T) {
 	p := retry.Policy{MaxAttempts: 0, Delay: 0}
 	if err := p.Validate(); err == nil {

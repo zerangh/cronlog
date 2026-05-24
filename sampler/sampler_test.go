@@ -70,6 +70,29 @@ func TestReset_ResetsCounter(t *testing.T) {
 	}
 }
 
+// TestReset_AllowsEveryNthAfterReset verifies that the full sampling pattern
+// is restored correctly after a Reset, not just the first call.
+func TestReset_AllowsEveryNthAfterReset(t *testing.T) {
+	const rate = 3
+	s, _ := New(rate)
+
+	// Partially advance the counter, then reset.
+	s.Allow()
+	s.Allow()
+	s.Reset()
+
+	// After reset the counter restarts, so only every 3rd call should be allowed.
+	allowed := 0
+	for i := 0; i < 9; i++ {
+		if s.Allow() {
+			allowed++
+		}
+	}
+	if allowed != 3 {
+		t.Fatalf("expected 3 allowed entries after reset, got %d", allowed)
+	}
+}
+
 func TestAllow_ConcurrentSafe(t *testing.T) {
 	s, _ := New(3)
 

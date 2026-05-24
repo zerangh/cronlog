@@ -14,6 +14,13 @@ func TestNew_InvalidMaxLen(t *testing.T) {
 	}
 }
 
+func TestNew_NegativeMaxLen(t *testing.T) {
+	_, err := truncate.New(-5)
+	if err == nil {
+		t.Fatal("expected error for maxLen=-5, got nil")
+	}
+}
+
 func TestNew_ValidMaxLen(t *testing.T) {
 	tr, err := truncate.New(10)
 	if err != nil {
@@ -57,6 +64,14 @@ func TestString_VerySmallMaxLen(t *testing.T) {
 	got := tr.String("hello")
 	if len(got) > 1 {
 		t.Errorf("expected len <= 1, got %d", len(got))
+	}
+}
+
+func TestString_EmptyInput(t *testing.T) {
+	tr, _ := truncate.New(10)
+	got := tr.String("")
+	if got != "" {
+		t.Errorf("expected empty string, got %q", got)
 	}
 }
 
